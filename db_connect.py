@@ -12,20 +12,24 @@ import numpy as np
 engine = create_engine('postgresql://data_user:12345678@localhost:5432/Aprobation')
 Session = sessionmaker(bind=engine)
 Base = sqlalchemy.orm.declarative_base()
+metadata = MetaData()
+
 
 # session = Session()
 
-def create_table(table_name, columns):
+def create_table(table_name, frame):
     # Создаем объект таблицы
-    metadata = MetaData()
-    table = Table(table_name, metadata)
     inspector = inspect(engine)
-    for name, data_type in columns.items():
-        if name == 'id':
-            table.append_column(Column(name, data_type, primary_key=True))
-        else:
-            table.append_column(Column(name, data_type))
-    if not table_name in inspector.get_table_names():
+    if table_name in inspector.get_table_names():
+        table = Table(table_name, metadata, autoload_with=engine)
+    else:
+        table = Table(table_name, metadata)
+        columns = create_colums(frame)
+        for name, data_type in columns.items():
+            if name == 'id':
+                table.append_column(Column(name, data_type, primary_key=True))
+            else:
+                table.append_column(Column(name, data_type))
         metadata.create_all(engine)
     return table
 
@@ -44,46 +48,62 @@ def create_colums(frame=pd.DataFrame()):
     return columns_dict
 
 
-data = Ysell_regu().orders_req(start=151, end=160)
-test = create_colums(data)
-table_name = 'orders'
-orders = create_table(table_name, test)
+def update_orders(table_name='orders', start=161, end=163):
+    data = Ysell_regu().orders_req(start=start, end=end)
+    orders = create_table(table_name, data)
+
+    class Orders(Base):
+        __tablename__ = table_name
+        __table__ = orders
+
+    session = Session()
+
+    with engine.connect() as connection:
+        # Загрузить данные из датафрейма в список словарей
+        data['id'] = data.index
+        data1 = data.to_dict('records')
+
+        # Обновить или добавить записи в таблицу
+        for row in data1:
+            orders = Orders(**row)
+            session.merge(orders)
+    session.commit()
+    session.close()
+    # with engine.connect() as connection:
+    #     result = connection.execute(text('SELECT * FROM ' + table_name))
+    #     df_result = pd.DataFrame(result.fetchall(), columns=result.keys())
+    #     df_result.to_excel('1234.xlsx')
+    #     print(df_result.tail())
+    #
+    # # закрытие соединения
+    # engine.dispose()
 
 
+# update_orders(start=1, end=2)
+for i in range(100):
+    update_orders(start=1 + 100 * i, end=100 + 100 * i)
+    Base = sqlalchemy.orm.declarative_base()
 
 
-class Orders(Base):
-    __tablename__ = table_name
-    __table__ = orders
+def update_products(table_name='products'):
+    data = Ysell_regu().product_req()
+    products = create_table(table_name, data)
 
+    class Products(Base):
+        __tablename__ = table_name
+        __table__ = products
 
-session = Session()
+    session = Session()
 
-with engine.connect() as connection:
-    # Загрузить данные из датафрейма в список словарей
-    data['id']=data.index
-    data1 = data.to_dict('records')
+    with engine.connect() as connection:
+        # Загрузить данные из датафрейма в список словарей
+        data['id'] = data.index
+        data1 = data.to_dict('records')
 
-    # Обновить или добавить записи в таблицу
-    for row in data1:
-        orders = Orders(**row)
-        session.merge(orders)
-session.commit()
-session.close()
-with engine.connect() as connection:
-    result = connection.execute(text('SELECT * FROM ' + table_name))
-    df_result = pd.DataFrame(result.fetchall(), columns=result.keys())
-    df_result.to_excel('1234.xlsx')
-    print(df_result.tail())
-
-# закрытие соединения
-engine.dispose()
-# Session = sessionmaker(bind=engine)
-# session = Session()
-#
-# handbook = Handbook.__table__
-# select_statement = handbook.select()
-# result_set = session.execute(select_statement)
-#
-# for row in result_set:
-#     print(row)
+        # Обновить или добавить записи в таблицу
+        for row in data1:
+            products = Products(**row)
+            session.merge(products)
+    session.commit()
+    session.close()
+# update_products()

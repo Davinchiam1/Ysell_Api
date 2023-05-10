@@ -33,7 +33,7 @@ class Ysell_regu:
         self.temp_frame = pd.DataFrame()
 
     def orders_by_page(self, page=1):
-        sort = '?sort=-id&'
+        sort = '?sort=-purchase_date&'
         pages = 'page=' + str(page)
         url = self.url + 'order' + sort + pages
         response = requests.get(url=url, headers=self.headers)
