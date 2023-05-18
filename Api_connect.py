@@ -8,6 +8,8 @@ from datetime import datetime
 from tqdm import tqdm
 
 
+
+
 def json_to_columns(row):
     # преобразование JSON в словарь
     data = row[0]
@@ -33,22 +35,24 @@ class Ysell_regu:
         self.temp_frame = pd.DataFrame()
 
     def orders_by_page(self, page=1):
+        self.temp_frame = pd.DataFrame()
         sort = '?sort=-purchase_date&'
         pages = 'page=' + str(page)
         url = self.url + 'order' + sort + pages
         response = requests.get(url=url, headers=self.headers)
-        print(response.status_code)
         json_data = response.json()
         df = pd.json_normalize(json_data)
-
+        if response.status_code != 200:
+            print(response.json())
         # применение функции к датафрейму
         df_temp = df['items'].apply(json_to_columns)
         temp_frame = pd.concat([df, df_temp], axis=1)
-        temp_frame = temp_frame.drop(['items','items.product'], axis=1)
+        temp_frame = temp_frame.drop(['items', 'items.product'], axis=1)
         temp_frame.set_index('id', inplace=True)
         return temp_frame
 
     def products_by_page(self, page=1):
+        self.temp_frame = pd.DataFrame()
         pages = '?page=' + str(page)
         url = self.url + 'product' + pages + '&per-page=50'
         response = requests.get(url=url, headers=self.headers)
@@ -62,14 +66,39 @@ class Ysell_regu:
         temp_frame.set_index('id', inplace=True)
         return temp_frame
 
+
     def orders_req(self, start=1, end=10):
         final_frame = pd.DataFrame()
-        for page in range(start, end+1):
-            final_frame = pd.concat([final_frame, self.orders_by_page(page=page)])
+        error_pages = []  # Список для хранения страниц с ошибками
+        total_pages = end - start + 1
+
+        with tqdm(total=total_pages) as pbar:
+            for page in range(start, end + 1):
+                try:
+                    final_frame = pd.concat([final_frame, self.orders_by_page(page=page)])
+                except Exception as e:
+                    # Обработка ошибки
+                    print(f"Ошибка на странице {page}: {e}")
+                    error_pages.append(page)
+
+                pbar.update(1)  # Увеличение прогресса на 1
+
+
+        # Дополнительный опрос страниц с ошибками
+        if len(error_pages)>0:
+            time.sleep(30)
+            for page in error_pages:
+                try:
+                    final_frame = pd.concat([final_frame, self.orders_by_page(page=page)])
+                except Exception as e:
+                    # Обработка ошибки при повторном опросе страницы
+                    print(f"Ошибка при повторном опросе страницы {page}: {e}")
+
         # final_frame['id']=final_frame.index
-        final_frame['shipments']=final_frame['shipments'].astype(str)
+        final_frame['shipments'] = final_frame['shipments'].astype(str)
         final_frame['services'] = final_frame['services'].astype(str)
         return final_frame
+
 
     def product_req(self, load_all=True, start=1, end=3):
         final_frame = pd.DataFrame()
@@ -81,7 +110,6 @@ class Ysell_regu:
             page += 1
         return final_frame
 
-
 # test = Ysell_regu()
-# test.orders_req()
+# test.orders_by_page(5900)
 # test.product_req()

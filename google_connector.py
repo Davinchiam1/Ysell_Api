@@ -45,7 +45,7 @@ class Table_connest:
 
 
 table_connect = Table_connest(table_name='Chews_stock_best deal')
-table_connect.load_frame(title1='Inv/Reserv',title2='Ord', data_directory='Z:\\Аналитика\\Amazon\\Update_api\\Reports 6 accounts 150523')
+table_connect.load_frame(title1='Inv/Reserv',title2='Ord', data_directory='Z:\\Аналитика\\Amazon\\Update_api\\Reports 180523')
 # # Укажите путь к файлу ключа JSON
 # credentials = ServiceAccountCredentials.from_json_keyfile_name('test-table-386307-5f6f43257222.json', scope)
 #

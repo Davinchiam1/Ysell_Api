@@ -1,4 +1,6 @@
 import datetime
+import sys
+
 from Api_connect import Ysell_regu
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, insert, select, exists, inspect
@@ -11,7 +13,6 @@ import numpy as np
 # создаем сессию
 engine = create_engine('postgresql://data_user:12345678@localhost:5432/Aprobation')
 Session = sessionmaker(bind=engine)
-Base = sqlalchemy.orm.declarative_base()
 metadata = MetaData()
 
 
@@ -48,9 +49,10 @@ def create_colums(frame=pd.DataFrame()):
     return columns_dict
 
 
-def update_orders(table_name='orders', start=161, end=163):
-    data = Ysell_regu().orders_req(start=start, end=end)
+def update_orders(table_name='orders', start=161, end=163,requ=None):
+    data = requ.orders_req(start=start, end=end)
     orders = create_table(table_name, data)
+    Base = sqlalchemy.orm.declarative_base()
 
     class Orders(Base):
         __tablename__ = table_name
@@ -80,15 +82,20 @@ def update_orders(table_name='orders', start=161, end=163):
 
 
 # update_orders(start=1, end=2)
-for i in range(50,85):
-    update_orders(start=1 + 100 * i, end=100 + 100 * i)
-    Base = sqlalchemy.orm.declarative_base()
+
+def update_pages(starter=1,ender=100):
+    # создаем один объект класса запросов к APi
+    requ=Ysell_regu()
+    for i in range(starter,ender):
+        Base = sqlalchemy.orm.declarative_base()
+        update_orders(start=1 + 100 * i, end=100 + 100 * i,requ=requ)
 
 
-def update_products(table_name='products'):
+
+def update_products(table_name='products',requ=None):
     data = Ysell_regu().product_req()
     products = create_table(table_name, data)
-
+    Base = sqlalchemy.orm.declarative_base()
     class Products(Base):
         __tablename__ = table_name
         __table__ = products
@@ -106,4 +113,8 @@ def update_products(table_name='products'):
             session.merge(products)
     session.commit()
     session.close()
+    print('\n')
 # update_products()
+
+
+update_pages(73,75)
