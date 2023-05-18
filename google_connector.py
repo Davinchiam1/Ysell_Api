@@ -22,7 +22,7 @@ class Table_connest:
         except gspread.WorksheetNotFound:
             self.table.add_worksheet(title=title1, rows="150", cols="60")
             worksheet = self.table.worksheet(title1)
-
+        worksheet.clear()
         loader = Reports_loading()
         data_invres,data_ord = loader.get_data(data_directory)
         data_invres.fillna('0', inplace=True)
@@ -35,6 +35,7 @@ class Table_connest:
         except gspread.WorksheetNotFound:
             self.table.add_worksheet(title=title2, rows="150", cols="60")
             worksheet = self.table.worksheet(title1)
+        worksheet.clear()
         columns=data_ord.columns.tolist()
         columns = [columns[-1]] + columns[:-1]
         data_ord=data_ord[columns]
@@ -44,7 +45,7 @@ class Table_connest:
 
 
 table_connect = Table_connest(table_name='Chews_stock_best deal')
-table_connect.load_frame(title1='Inv/Reserv',title2='Ord', data_directory='Z:\\Аналитика\\Amazon\\Update_api\\Amz Stock and Amz Orders')
+table_connect.load_frame(title1='Inv/Reserv',title2='Ord', data_directory='Z:\\Аналитика\\Amazon\\Update_api\\Reports 6 accounts 150523')
 # # Укажите путь к файлу ключа JSON
 # credentials = ServiceAccountCredentials.from_json_keyfile_name('test-table-386307-5f6f43257222.json', scope)
 #

@@ -80,7 +80,7 @@ def update_orders(table_name='orders', start=161, end=163):
 
 
 # update_orders(start=1, end=2)
-for i in range(10):
+for i in range(50,85):
     update_orders(start=1 + 100 * i, end=100 + 100 * i)
     Base = sqlalchemy.orm.declarative_base()
 
