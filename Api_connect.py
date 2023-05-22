@@ -8,8 +8,6 @@ from datetime import datetime
 from tqdm import tqdm
 
 
-
-
 def json_to_columns(row):
     # преобразование JSON в словарь
     data = row[0]
@@ -32,20 +30,21 @@ class Ysell_regu:
             'Authorization': token
         }
         self.pages = None
-        self.temp_frame = pd.DataFrame()
+        self.temp_frame = None
 
     def orders_by_page(self, page=1):
         self.temp_frame = pd.DataFrame()
         sort = '?sort=-purchase_date&'
         pages = 'page=' + str(page)
         url = self.url + 'order' + sort + pages
-        response = requests.get(url=url, headers=self.headers)
+        response = requests.get(url=url, headers=self.headers, timeout=30)
         json_data = response.json()
         df = pd.json_normalize(json_data)
         if response.status_code != 200:
             print(response.json())
         # применение функции к датафрейму
         df_temp = df['items'].apply(json_to_columns)
+        df_temp['items.p_id'] = df_temp['items.p_id'].fillna(0)
         temp_frame = pd.concat([df, df_temp], axis=1)
         temp_frame = temp_frame.drop(['items', 'items.product'], axis=1)
         temp_frame.set_index('id', inplace=True)
@@ -66,11 +65,11 @@ class Ysell_regu:
         temp_frame.set_index('id', inplace=True)
         return temp_frame
 
-
     def orders_req(self, start=1, end=10):
         final_frame = pd.DataFrame()
         error_pages = []  # Список для хранения страниц с ошибками
         total_pages = end - start + 1
+        self.temp_frame = pd.DataFrame()
 
         with tqdm(total=total_pages) as pbar:
             for page in range(start, end + 1):
@@ -83,9 +82,8 @@ class Ysell_regu:
 
                 pbar.update(1)  # Увеличение прогресса на 1
 
-
         # Дополнительный опрос страниц с ошибками
-        if len(error_pages)>0:
+        if len(error_pages) > 0:
             time.sleep(30)
             for page in error_pages:
                 try:
@@ -97,8 +95,8 @@ class Ysell_regu:
         # final_frame['id']=final_frame.index
         final_frame['shipments'] = final_frame['shipments'].astype(str)
         final_frame['services'] = final_frame['services'].astype(str)
-        return final_frame
 
+        return final_frame
 
     def product_req(self, load_all=True, start=1, end=3):
         final_frame = pd.DataFrame()
@@ -110,6 +108,8 @@ class Ysell_regu:
             page += 1
         return final_frame
 
+
 # test = Ysell_regu()
-# test.orders_by_page(5900)
+# test_data = test.orders_req(start=8300, end=8700)
+# test_data.to_excel('test_data.xlsx')
 # test.product_req()

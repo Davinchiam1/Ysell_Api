@@ -49,11 +49,11 @@ def create_colums(frame=pd.DataFrame()):
     return columns_dict
 
 
-def update_orders(table_name='orders', start=161, end=163,requ=None):
+def update_orders(table_name='orders', start=161, end=163, requ=None):
     data = requ.orders_req(start=start, end=end)
     orders = create_table(table_name, data)
     Base = sqlalchemy.orm.declarative_base()
-
+    errors_list=[]
     class Orders(Base):
         __tablename__ = table_name
         __table__ = orders
@@ -67,8 +67,12 @@ def update_orders(table_name='orders', start=161, end=163,requ=None):
 
         # Обновить или добавить записи в таблицу
         for row in data1:
-            orders = Orders(**row)
-            session.merge(orders)
+            try:
+                orders = Orders(**row)
+                session.merge(orders)
+            except Exception as e:
+                errors_list.append(row['id'])
+                continue
     session.commit()
     session.close()
     # with engine.connect() as connection:
@@ -83,19 +87,19 @@ def update_orders(table_name='orders', start=161, end=163,requ=None):
 
 # update_orders(start=1, end=2)
 
-def update_pages(starter=1,ender=100):
+def update_pages(starter=1, ender=100):
     # создаем один объект класса запросов к APi
-    requ=Ysell_regu()
-    for i in range(starter,ender):
+    requ = Ysell_regu()
+    for i in range(starter, ender+1):
         Base = sqlalchemy.orm.declarative_base()
-        update_orders(start=1 + 100 * i, end=100 + 100 * i,requ=requ)
+        update_orders(start=1 + 100 * i, end=100 + 100 * i, requ=requ)
 
 
-
-def update_products(table_name='products',requ=None):
+def update_products(table_name='products', requ=None):
     data = Ysell_regu().product_req()
     products = create_table(table_name, data)
     Base = sqlalchemy.orm.declarative_base()
+
     class Products(Base):
         __tablename__ = table_name
         __table__ = products
@@ -114,7 +118,9 @@ def update_products(table_name='products',requ=None):
     session.commit()
     session.close()
     print('\n')
+
+
 # update_products()
 
-
-update_pages(73,75)
+# update_orders(start=8240,end=8250,requ=Ysell_regu())
+update_pages(1, 15)
