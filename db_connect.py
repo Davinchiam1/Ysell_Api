@@ -123,4 +123,4 @@ def update_products(table_name='products', requ=None):
 # update_products()
 
 # update_orders(start=8240,end=8250,requ=Ysell_regu())
-update_pages(1, 15)
+update_pages(1, 10)

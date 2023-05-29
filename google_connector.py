@@ -37,7 +37,7 @@ class Table_connest:
             worksheet = self.table.worksheet(title1)
         worksheet.clear()
         columns=data_ord.columns.tolist()
-        columns = [columns[-1]] + columns[:-1]
+        # columns = [columns[-1]] + columns[:-1]
         data_ord=data_ord[columns]
         data = [data_ord.columns.values.tolist()] + data_ord.values.tolist()
         worksheet.update('A1', data)
@@ -45,7 +45,7 @@ class Table_connest:
 
 
 table_connect = Table_connest(table_name='Chews_stock_best deal')
-table_connect.load_frame(title1='Inv/Reserv1',title2='Ord', data_directory='Z:\\Аналитика\\Amazon\\Update_api\\Reports 22052023')
+table_connect.load_frame(title1='Inv/Reserv',title2='Ord', data_directory='Z:\\Аналитика\\Amazon\\Update_api\\Reports 29052023')
 # # Укажите путь к файлу ключа JSON
 # credentials = ServiceAccountCredentials.from_json_keyfile_name('test-table-386307-5f6f43257222.json', scope)
 #

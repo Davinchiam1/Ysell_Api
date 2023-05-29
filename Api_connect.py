@@ -1,6 +1,6 @@
 import os.path
 import time
-
+from urllib.parse import urlencode
 import requests
 import json
 import pandas as pd
@@ -113,3 +113,58 @@ class Ysell_regu:
 # test_data = test.orders_req(start=8300, end=8700)
 # test_data.to_excel('test_data.xlsx')
 # test.product_req()
+
+class Keepa_req:
+
+    def __init__(self):
+        self.url = 'https://api.keepa.com/'
+        with open('token_keepa.txt', "r", encoding='utf8') as f:
+            token = f.readline()
+            print(token)
+        self.access_key = token
+        self.pages = None
+        self.temp_frame = None
+
+    def req(self):
+        url = f"{self.url}token?key={self.access_key}"
+        response=requests.get(url)
+        print(response.text)
+    def category_req(self,category=0):
+        url = f"{self.url}category?key={self.access_key}&domain={1}&category={category}&parents={0}"
+        response=requests.get(url)
+        json_data = response.json()['categories']
+        df = pd.DataFrame.from_dict(json_data, orient='index')
+        df.to_excel('test1.xlsx')
+
+    def category_search(self,search=""):
+        url = f"{self.url}search?key={self.access_key}&domain={1}&type=category&term={search}"
+        response=requests.get(url)
+        json_data = response.json()['categories']
+        df = pd.DataFrame.from_dict(json_data, orient='index')
+        df.to_excel('test1.xlsx')
+
+    def product_req(self, asin):
+        if type(asin) is list:
+            asin = ','.join(asin)
+        data={
+            'asin' : asin,
+            'stats' : 180,
+        }
+        encoded_data = urlencode(data)
+        url = f"{self.url}product?key={self.access_key}&domain={1}&{encoded_data}"
+        response = requests.get(url)
+        json_data = response.json()['product']
+        df = pd.DataFrame.from_dict(json_data, orient='index')
+        df.to_excel('test2.xlsx')
+
+    def product_search(self,search=''):
+        url = f"{self.url}search?key={self.access_key}&domain={1}&type=product&term={search}&stats=180"
+        response=requests.get(url)
+        json_data = response.json()['categories']
+        df = pd.DataFrame.from_dict(json_data, orient='index')
+        df.to_excel('test1.xlsx')
+# ['categories']
+# test2=Keepa_req()
+# test2.req()
+# # test2.category_req()
+# test2.category_search('health')

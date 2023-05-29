@@ -25,9 +25,9 @@ class Reports_loading:
                     if 'Reserved' in str(f.path):
                         self.reserved_list.append(f.path)
                 elif f.is_file() and f.path.split('.')[-1].lower() == 'txt':
-                    if 'Order' in str(f.path):
+                    if 'Orders1' in str(f.path):
                         self.orders_list.append(f.path)
-                    if 'Order1' in str(f.path):
+                    if 'Orders' in str(f.path):
                         self.orders_stat.append(f.path)
         else:
             for f in os.scandir():
@@ -37,9 +37,9 @@ class Reports_loading:
                     if 'Reserved' in str(f.path):
                         self.reserved_list.append(f.path)
                 elif f.is_file() and f.path.split('.')[-1].lower() == 'txt':
-                    if 'Order1М' in str(f.path):
+                    if 'Orders1М' in str(f.path):
                         self.orders_list.append(f.path)
-                    if 'Order1' in str(f.path):
+                    if 'Orders1' in str(f.path):
                         self.orders_stat.append(f.path)
 
     def _read_data(self):
@@ -64,13 +64,15 @@ class Reports_loading:
         self.orders_frame = self.orders_frame[self.orders_frame['item-status'] == 'Shipped']
         self.orders_frame = self.orders_frame.groupby('asin').agg({'quantity': 'sum', 'item-price': 'mean'})
         self.orders_frame['avg_per_day']=self.orders_frame['quantity']/30
-        self.orders_frame['asin']=self.orders_frame.index
-        self.orders_stat_frame = self.orders_stat_frame[self.orders_frame['item-status'] == 'Shipped']
+        self.orders_frame.reset_index(inplace=True, names='asin')
+        self.orders_stat_frame = self.orders_stat_frame[self.orders_stat_frame['item-status'] == 'Shipped']
         self.orders_stat_frame = self.orders_stat_frame.groupby('asin').agg({'quantity': 'sum', 'item-price': 'mean'})
         self.orders_stat_frame['quantity']=self.orders_stat_frame['quantity']/3
         self.orders_stat_frame['avg_per_day_3M']=self.orders_stat_frame['quantity']/30
-        self.orders_stat_frame['asin']=self.orders_stat_frame.index
+        self.orders_stat_frame.reset_index(inplace=True,names='asin')
+        self.orders_stat_frame.rename(inplace=True, columns={'quantity': 'quantity_3M', 'item-price': 'item-price_3M','avg_per_day_3M':'avg_per_day_3M'})
         self.orders_frame = pd.merge(self.orders_frame,self.orders_stat_frame,on='asin',how='outer')
+        self.orders_frame.fillna(0,inplace=True)
         self.result_frame=pd.merge(self.result_frame,self.orders_frame,left_on='asin_x',right_on='asin',how='outer')
 
     def get_data(self, directory=None):
@@ -81,6 +83,6 @@ class Reports_loading:
 
 
 # test=Reports_loading()
-# frame,frame2=test.get_data(directory='Z:\\Аналитика\\Amazon\\Update_api\\Amz Stock and Amz Orders')
+# frame,frame2=test.get_data(directory='Z:\\Аналитика\\Amazon\\Update_api\\Reports 23052023')
 # frame.to_excel('test_file.xlsx', sheet_name='list1')
 # frame2.to_excel('test_file2.xlsx', sheet_name='list1')
