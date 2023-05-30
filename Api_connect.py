@@ -20,9 +20,9 @@ def json_to_columns(row):
 
 class Ysell_regu:
 
-    def __init__(self):
-        self.url = 'https://1359.eu11.ysell.pro/api/v1/'
-        with open('token.txt', "r", encoding='utf8') as f:
+    def __init__(self, url='https://1359.eu11.ysell.pro/api/v1/',token='token.txt'):
+        self.url = url
+        with open(token, "r", encoding='utf8') as f:
             token = f.readline()
             print(token)
         self.headers = {

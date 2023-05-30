@@ -11,10 +11,11 @@ import sqlalchemy
 import numpy as np
 
 # создаем сессию
+
+
 engine = create_engine('postgresql://data_user:12345678@localhost:5432/Aprobation')
 Session = sessionmaker(bind=engine)
 metadata = MetaData()
-
 
 # session = Session()
 
@@ -49,7 +50,9 @@ def create_colums(frame=pd.DataFrame()):
     return columns_dict
 
 
-def update_orders(table_name='orders', start=161, end=163, requ=None):
+def update_orders(table_name='orders', start=161, end=163,link='https://1359.eu11.ysell.pro/api/v1/',token='token.txt',requ=None):
+    if requ is None:
+        requ = Ysell_regu(url=link, token=token)
     data = requ.orders_req(start=start, end=end)
     orders = create_table(table_name, data)
     Base = sqlalchemy.orm.declarative_base()
@@ -87,16 +90,16 @@ def update_orders(table_name='orders', start=161, end=163, requ=None):
 
 # update_orders(start=1, end=2)
 
-def update_pages(starter=1, ender=100):
+def update_pages(starter=1, ender=100,link='https://1359.eu11.ysell.pro/api/v1/',tablename='orders',token='token.txt'):
     # создаем один объект класса запросов к APi
-    requ = Ysell_regu()
-    for i in range(starter, ender+1):
+    requ = Ysell_regu(url=link,token=token)
+    for i in range(starter-1, ender+1):
         Base = sqlalchemy.orm.declarative_base()
-        update_orders(start=1 + 100 * i, end=100 + 100 * i, requ=requ)
+        update_orders(start=1 + 100 * i, end=100 + 100 * i, requ=requ,table_name=tablename)
 
 
-def update_products(table_name='products', requ=None):
-    data = Ysell_regu().product_req()
+def update_products(table_name='products',token='token.txt',link='https://1359.eu11.ysell.pro/api/v1/'):
+    data = Ysell_regu(url=link,token=token).product_req()
     products = create_table(table_name, data)
     Base = sqlalchemy.orm.declarative_base()
 
@@ -123,4 +126,5 @@ def update_products(table_name='products', requ=None):
 # update_products()
 
 # update_orders(start=8240,end=8250,requ=Ysell_regu())
-update_pages(1, 10)
+update_pages(1, 5,token='token.txt',tablename='orders',link='https://1359.eu11.ysell.pro/api/v1/')
+update_pages(1, 5,token='token2.txt',tablename='orders_v2',link='https://nemo.eu2.ysell.pro/api/v1/')
