@@ -126,5 +126,5 @@ def update_products(table_name='products',token='token.txt',link='https://1359.e
 # update_products()
 
 # update_orders(start=8240,end=8250,requ=Ysell_regu())
-update_pages(1, 5,token='token.txt',tablename='orders',link='https://1359.eu11.ysell.pro/api/v1/')
-update_pages(1, 5,token='token2.txt',tablename='orders_v2',link='https://nemo.eu2.ysell.pro/api/v1/')
+# update_pages(1, 5,token='token.txt',tablename='orders',link='https://1359.eu11.ysell.pro/api/v1/')
+# update_pages(1, 5,token='token2.txt',tablename='orders_v2',link='https://nemo.eu2.ysell.pro/api/v1/')
