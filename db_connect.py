@@ -1,11 +1,11 @@
 import datetime
 import sys
-
+import psycopg2
 from Api_connect import Ysell_regu
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, insert, select, exists, inspect
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, Float, String, DATETIME, Date, MetaData, Table, text
+from sqlalchemy import Column, Integer, Float, String, DATETIME, Date, MetaData, Table, text, DDL
 import pandas as pd
 import sqlalchemy
 import numpy as np
@@ -19,11 +19,15 @@ metadata = MetaData()
 
 # session = Session()
 
+
 def create_table(table_name, frame):
     # Создаем объект таблицы
     inspector = inspect(engine)
     if table_name in inspector.get_table_names():
         table = Table(table_name, metadata, autoload_with=engine)
+        db_columns = table.columns.keys()
+        frame_columns = frame.columns
+        new_columns = set(frame_columns) - set(db_columns)
     else:
         table = Table(table_name, metadata)
         columns = create_colums(frame)
@@ -66,6 +70,7 @@ def update_orders(table_name='orders', start=161, end=163,link='https://1359.eu1
     with engine.connect() as connection:
         # Загрузить данные из датафрейма в список словарей
         data['id'] = data.index
+        # data=data.drop('items.serial_num',axis=1)
         data1 = data.to_dict('records')
 
         # Обновить или добавить записи в таблицу
@@ -75,6 +80,7 @@ def update_orders(table_name='orders', start=161, end=163,link='https://1359.eu1
                 session.merge(orders)
             except Exception as e:
                 errors_list.append(row['id'])
+                print(e)
                 continue
     session.commit()
     session.close()
@@ -125,6 +131,6 @@ def update_products(table_name='products',token='token.txt',link='https://1359.e
 
 # update_products()
 
-# update_orders(start=8240,end=8250,requ=Ysell_regu())
+# update_orders(start=1,end=10,token='token.txt',table_name='orders',link='https://1359.eu11.ysell.pro/api/v1/')
 # update_pages(1, 5,token='token.txt',tablename='orders',link='https://1359.eu11.ysell.pro/api/v1/')
 # update_pages(1, 5,token='token2.txt',tablename='orders_v2',link='https://nemo.eu2.ysell.pro/api/v1/')

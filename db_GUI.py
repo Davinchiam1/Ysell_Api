@@ -57,7 +57,7 @@ class App(tk.Frame):
         elif self.combobox.get() == self.options[1]:
             with open('token2.txt', "r", encoding='utf8') as f:
                 token = f.readline()
-                self.token_name = 'token.txt'
+                self.token_name = 'token2.txt'
                 self.orders_name = 'orders_v2'
                 self.prod_table = 'products_v2'
                 self.token_label["text"] = f"Token: {token}"

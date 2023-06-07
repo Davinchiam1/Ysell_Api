@@ -51,7 +51,8 @@ class Reports_loading:
             self.reserved_frame = pd.concat([self.reserved_frame, temp_frame], ignore_index=True, axis=0)
         for file in self.orders_list:
             temp_frame = pd.read_csv(file, delimiter='\t', encoding='cp1252',low_memory=False)
-            temp_frame=temp_frame[['sku','asin','item-status','quantity','currency','item-price']]
+            temp_frame['purchase-date']=pd.to_datetime(temp_frame['purchase-date']).dt.date
+            temp_frame=temp_frame[['sku','asin','item-status','quantity','currency','item-price','purchase-date']]
             self.orders_frame=pd.concat([self.orders_frame, temp_frame], ignore_index=True, axis=0)
         for file in self.orders_stat:
             temp_frame = pd.read_csv(file, delimiter='\t', encoding='cp1252', low_memory=False)
@@ -61,10 +62,25 @@ class Reports_loading:
     def _concentrate_data(self, status='Shipped'):
         """Concentrating data into one dataframe"""
         self.result_frame = pd.merge(self.inventory_frame, self.reserved_frame, on='fnsku', how='outer')
+
+        end_date = self.orders_frame['purchase-date'].max()  # Последняя дата в столбце 'purchase-date'
+        start_date = end_date - pd.DateOffset(days=13)
+        last_orders = self.orders_frame[
+            (self.orders_frame['purchase-date'] >= pd.Timestamp(start_date)) &
+            (self.orders_frame['purchase-date'] <= pd.Timestamp(end_date))
+            ]
+        last_orders = last_orders[last_orders['item-status'] == 'Shipped']
+        last_orders = last_orders.groupby('asin').agg({'quantity': 'sum', 'item-price': 'mean'})
+        last_orders['avg_per_day_14_d'] = last_orders['quantity'] / 14
+        last_orders.rename(inplace=True, columns={'quantity': 'quantity_14_d', 'item-price': 'item-price_14_d',
+                                                             'avg_per_day_14_d': 'avg_per_day_14_d'})
+        last_orders.reset_index(inplace=True, names='asin')
+
         self.orders_frame = self.orders_frame[self.orders_frame['item-status'] == 'Shipped']
         self.orders_frame = self.orders_frame.groupby('asin').agg({'quantity': 'sum', 'item-price': 'mean'})
         self.orders_frame['avg_per_day']=self.orders_frame['quantity']/30
         self.orders_frame.reset_index(inplace=True, names='asin')
+
         self.orders_stat_frame = self.orders_stat_frame[self.orders_stat_frame['item-status'] == 'Shipped']
         self.orders_stat_frame = self.orders_stat_frame.groupby('asin').agg({'quantity': 'sum', 'item-price': 'mean'})
         self.orders_stat_frame['quantity']=self.orders_stat_frame['quantity']/3
@@ -72,6 +88,7 @@ class Reports_loading:
         self.orders_stat_frame.reset_index(inplace=True,names='asin')
         self.orders_stat_frame.rename(inplace=True, columns={'quantity': 'quantity_3M', 'item-price': 'item-price_3M','avg_per_day_3M':'avg_per_day_3M'})
         self.orders_frame = pd.merge(self.orders_frame,self.orders_stat_frame,on='asin',how='outer')
+        self.orders_frame = pd.merge(self.orders_frame, last_orders,on='asin',how='outer')
         self.orders_frame.fillna(0,inplace=True)
         self.result_frame=pd.merge(self.result_frame,self.orders_frame,left_on='asin_x',right_on='asin',how='outer')
 
@@ -83,6 +100,6 @@ class Reports_loading:
 
 
 # test=Reports_loading()
-# frame,frame2=test.get_data(directory='Z:\\Аналитика\\Amazon\\Update_api\\Reports 23052023')
+# frame,frame2=test.get_data(directory='Z:\\Аналитика\\Amazon\\Update_api\\Reports 01062023')
 # frame.to_excel('test_file.xlsx', sheet_name='list1')
 # frame2.to_excel('test_file2.xlsx', sheet_name='list1')
