@@ -99,7 +99,7 @@ def update_orders(table_name='orders', start=161, end=163,link='https://1359.eu1
 def update_pages(starter=1, ender=100,link='https://1359.eu11.ysell.pro/api/v1/',tablename='orders',token='token.txt'):
     # создаем один объект класса запросов к APi
     requ = Ysell_regu(url=link,token=token)
-    for i in range(starter-1, ender+1):
+    for i in range(starter-1, ender):
         Base = sqlalchemy.orm.declarative_base()
         update_orders(start=1 + 100 * i, end=100 + 100 * i, requ=requ,table_name=tablename)
 

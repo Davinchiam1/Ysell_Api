@@ -6,7 +6,7 @@ from tkinter import filedialog
 from tkinter import messagebox
 import db_connect as dbc
 from tkcalendar import DateEntry
-
+import threading
 
 class App(tk.Frame):
     def __init__(self, master):
@@ -44,6 +44,15 @@ class App(tk.Frame):
 
         self.products = tk.Button(self, text="Load products", command=self.load_products)
         self.products.grid(row=3, column=2,sticky=tk.N)
+
+    def update_orders_thread(self):
+        threading.Thread(target=self.update_orders).start()
+
+    def load_orders_thread(self):
+        threading.Thread(target=self.load_orders).start()
+
+    def load_products_thread(self):
+        threading.Thread(target=self.load_products).start()
 
     def selected(self, event):
         # получаем выделенный элемент

@@ -66,8 +66,8 @@ class Reports_loading:
         end_date = self.orders_frame['purchase-date'].max()  # Последняя дата в столбце 'purchase-date'
         start_date = end_date - pd.DateOffset(days=13)
         last_orders = self.orders_frame[
-            (self.orders_frame['purchase-date'] >= pd.Timestamp(start_date)) &
-            (self.orders_frame['purchase-date'] <= pd.Timestamp(end_date))
+            (self.orders_frame['purchase-date'] >= start_date.date()) &
+            (self.orders_frame['purchase-date'] <= end_date)
             ]
         last_orders = last_orders[last_orders['item-status'] == 'Shipped']
         last_orders = last_orders.groupby('asin').agg({'quantity': 'sum', 'item-price': 'mean'})

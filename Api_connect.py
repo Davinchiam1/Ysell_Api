@@ -20,7 +20,7 @@ def json_to_columns(row):
 
 class Ysell_regu:
 
-    def __init__(self, url='https://1359.eu11.ysell.pro/api/v1/',token='token.txt'):
+    def __init__(self, url='https://1359.eu11.ysell.pro/api/v1/', token='token.txt'):
         self.url = url
         with open(token, "r", encoding='utf8') as f:
             token = f.readline()
@@ -127,18 +127,19 @@ class Keepa_req:
 
     def req(self):
         url = f"{self.url}token?key={self.access_key}"
-        response=requests.get(url)
+        response = requests.get(url)
         print(response.text)
-    def category_req(self,category=0):
+
+    def category_req(self, category=0):
         url = f"{self.url}category?key={self.access_key}&domain={1}&category={category}&parents={0}"
-        response=requests.get(url)
+        response = requests.get(url)
         json_data = response.json()['categories']
         df = pd.DataFrame.from_dict(json_data, orient='index')
         df.to_excel('test1.xlsx')
 
-    def category_search(self,search=""):
+    def category_search(self, search=""):
         url = f"{self.url}search?key={self.access_key}&domain={1}&type=category&term={search}"
-        response=requests.get(url)
+        response = requests.get(url)
         json_data = response.json()['categories']
         df = pd.DataFrame.from_dict(json_data, orient='index')
         df.to_excel('test1.xlsx')
@@ -146,9 +147,9 @@ class Keepa_req:
     def product_req(self, asin):
         if type(asin) is list:
             asin = ','.join(asin)
-        data={
-            'asin' : asin,
-            'stats' : 180,
+        data = {
+            'asin': asin,
+            'stats': 180,
         }
         encoded_data = urlencode(data)
         url = f"{self.url}product?key={self.access_key}&domain={1}&{encoded_data}"
@@ -157,9 +158,25 @@ class Keepa_req:
         df = pd.DataFrame.from_dict(json_data, orient='index')
         df.to_excel('test2.xlsx')
 
-    def product_search(self,search=''):
+    def product_search(self, search={}):
+        encoded_data = urlencode(search)
         url = f"{self.url}search?key={self.access_key}&domain={1}&type=product&term={search}&stats=180"
-        response=requests.get(url)
+        response = requests.get(url)
+        json_data = response.json()['categories']
+        df = pd.DataFrame.from_dict(json_data, orient='index')
+        df.to_excel('test1.xlsx')
+
+    def product_finder(self, search={}):
+        encoded_data = urlencode(search)
+        url = f"{self.url}query?key={self.access_key}&domain={1}&selection={search}"
+        response = requests.get(url)
+        json_data = response.json()['categories']
+        df = pd.DataFrame.from_dict(json_data, orient='index')
+        df.to_excel('test1.xlsx')
+
+    def bsr_req(self, category: int = 0, range: int = 30):
+        url = f"{self.url}bestsellers?key={self.access_key}&domain={1}&category={category}&range={range}"
+        response = requests.get(url)
         json_data = response.json()['categories']
         df = pd.DataFrame.from_dict(json_data, orient='index')
         df.to_excel('test1.xlsx')

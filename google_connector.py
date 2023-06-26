@@ -12,13 +12,20 @@ class Table_connest:
     def __init__(self, token='token.json', table_name='123'):
         self.credentials = ServiceAccountCredentials.from_json_keyfile_name(token, scope)
         self.table_name = table_name
-        client = gspread.authorize(self.credentials)
-        self.table = client.open(table_name)
+        self.client = gspread.authorize(self.credentials)
+        self.table = self.client.open(table_name)
+
+    def buckup_data(self, title, values, table_name='backup'):
+        table=self.client.open(table_name)
+        worksheet = table.worksheet(title=title)
+        worksheet.update('A1', values)
 
     def load_frame(self, title1,title2, data_directory):
 
         try:
             worksheet = self.table.worksheet(title=title1)
+            values = worksheet.get_all_values()
+            self.buckup_data(title=title1,values=values)
         except gspread.WorksheetNotFound:
             self.table.add_worksheet(title=title1, rows="150", cols="60")
             worksheet = self.table.worksheet(title1)
@@ -32,6 +39,8 @@ class Table_connest:
 
         try:
             worksheet = self.table.worksheet(title=title2)
+            values = worksheet.get_all_values()
+            self.buckup_data(title=title2, values=values)
         except gspread.WorksheetNotFound:
             self.table.add_worksheet(title=title2, rows="150", cols="60")
             worksheet = self.table.worksheet(title1)
@@ -45,7 +54,7 @@ class Table_connest:
 
 
 table_connect = Table_connest(table_name='Chews_stock_best deal')
-table_connect.load_frame(title1='Inv/Reserv',title2='Ord', data_directory='Z:\\Аналитика\\Amazon\\Update_api\\Orders 05062023')
+table_connect.load_frame(title1='Inv/Reserv',title2='Ord', data_directory='Z:\\Аналитика\\Amazon\\Update_api\\Reports 26062023')
 # # Укажите путь к файлу ключа JSON
 # credentials = ServiceAccountCredentials.from_json_keyfile_name('test-table-386307-5f6f43257222.json', scope)
 #
