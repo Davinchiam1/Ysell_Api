@@ -130,21 +130,27 @@ class Keepa_req:
         response = requests.get(url)
         print(response.text)
 
-    def category_req(self, category=0):
+    def category_req(self, category=0, filepath=None):
         url = f"{self.url}category?key={self.access_key}&domain={1}&category={category}&parents={0}"
         response = requests.get(url)
         json_data = response.json()['categories']
         df = pd.DataFrame.from_dict(json_data, orient='index')
-        df.to_excel('test1.xlsx')
+        if filepath is not None:
+            df.to_excel(filepath+'\\category_req.xlsx')
+        else:
+            df.to_excel('category_req.xlsx')
 
-    def category_search(self, search=""):
+    def category_search(self, search="",filepath=None):
         url = f"{self.url}search?key={self.access_key}&domain={1}&type=category&term={search}"
         response = requests.get(url)
         json_data = response.json()['categories']
         df = pd.DataFrame.from_dict(json_data, orient='index')
-        df.to_excel('test1.xlsx')
+        if filepath is not None:
+            df.to_excel(filepath + '\\category_req.xlsx')
+        else:
+            df.to_excel('category_req.xlsx')
 
-    def product_req(self, asin):
+    def product_req(self, asin,filepath=None):
         if type(asin) is list:
             asin = ','.join(asin)
         data = {
@@ -156,30 +162,42 @@ class Keepa_req:
         response = requests.get(url)
         json_data = response.json()['product']
         df = pd.DataFrame.from_dict(json_data, orient='index')
-        df.to_excel('test2.xlsx')
+        if filepath is not None:
+            df.to_excel(filepath + '\\category_req.xlsx')
+        else:
+            df.to_excel('product_req.xlsx')
 
-    def product_search(self, search={}):
+    def product_search(self, search={},filepath=None):
         encoded_data = urlencode(search)
         url = f"{self.url}search?key={self.access_key}&domain={1}&type=product&term={search}&stats=180"
         response = requests.get(url)
         json_data = response.json()['categories']
         df = pd.DataFrame.from_dict(json_data, orient='index')
-        df.to_excel('test1.xlsx')
+        if filepath is not None:
+            df.to_excel(filepath + '\\category_req.xlsx')
+        else:
+            df.to_excel('product_search.xlsx')
 
-    def product_finder(self, search={}):
+    def product_finder(self, search={}, filepath=None):
         encoded_data = urlencode(search)
         url = f"{self.url}query?key={self.access_key}&domain={1}&selection={search}"
         response = requests.get(url)
         json_data = response.json()['categories']
         df = pd.DataFrame.from_dict(json_data, orient='index')
-        df.to_excel('test1.xlsx')
+        if filepath is not None:
+            df.to_excel(filepath + '\\category_req.xlsx')
+        else:
+            df.to_excel('product_finder.xlsx')
 
-    def bsr_req(self, category: int = 0, range: int = 30):
+    def bsr_req(self, category: int = 0, range: int = 30,filepath=None):
         url = f"{self.url}bestsellers?key={self.access_key}&domain={1}&category={category}&range={range}"
         response = requests.get(url)
         json_data = response.json()['categories']
         df = pd.DataFrame.from_dict(json_data, orient='index')
-        df.to_excel('test1.xlsx')
+        if filepath is not None:
+            df.to_excel(filepath + '\\category_req.xlsx')
+        else:
+            df.to_excel('bsr_req.xlsx')
 # ['categories']
 # test2=Keepa_req()
 # test2.req()

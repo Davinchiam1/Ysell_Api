@@ -102,6 +102,7 @@ def update_pages(starter=1, ender=100,link='https://1359.eu11.ysell.pro/api/v1/'
     for i in range(starter-1, ender):
         Base = sqlalchemy.orm.declarative_base()
         update_orders(start=1 + 100 * i, end=100 + 100 * i, requ=requ,table_name=tablename)
+    print('Ready!')
 
 
 def update_products(table_name='products',token='token.txt',link='https://1359.eu11.ysell.pro/api/v1/'):
