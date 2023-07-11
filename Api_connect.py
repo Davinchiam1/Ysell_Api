@@ -37,7 +37,7 @@ class Ysell_regu:
         sort = '?sort=-purchase_date&'
         pages = 'page=' + str(page)
         url = self.url + 'order' + sort + pages
-        response = requests.get(url=url, headers=self.headers, timeout=30)
+        response = requests.get(url=url, headers=self.headers, timeout=60)
         json_data = response.json()
         df = pd.json_normalize(json_data)
         if response.status_code != 200:

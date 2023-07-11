@@ -96,7 +96,7 @@ class App(tk.Frame):
                           link='https://' + self.combobox.get() + '.ysell.pro/api/v1/', token=self.token_name)
 
     def load_products(self):
-        dbc.update_products(table_name=self.orders_name,link='https://' + self.combobox.get() + '.ysell.pro/api/v1/', token=self.token_name)
+        dbc.update_products(table_name=self.prod_table,link='https://' + self.combobox.get() + '.ysell.pro/api/v1/', token=self.token_name)
 
 root = tk.Tk()
 root.title("Database update App")

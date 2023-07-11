@@ -13,7 +13,7 @@ import numpy as np
 # создаем сессию
 
 
-engine = create_engine('postgresql://data_user:12345678@localhost:5432/Aprobation')
+engine = create_engine('postgresql://api_user:Trfi359Nyi@localhost:5432/main_base')
 Session = sessionmaker(bind=engine)
 metadata = MetaData()
 
