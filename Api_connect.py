@@ -45,6 +45,7 @@ class Ysell_regu:
         # применение функции к датафрейму
         df_temp = df['items'].apply(json_to_columns)
         df_temp['items.p_id'] = df_temp['items.p_id'].fillna(0)
+        df['is_business_order'] = df['is_business_order'].fillna(0)
         temp_frame = pd.concat([df, df_temp], axis=1)
         temp_frame = temp_frame.drop(['items', 'items.product'], axis=1)
         temp_frame.set_index('id', inplace=True)
