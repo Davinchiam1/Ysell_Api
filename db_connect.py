@@ -1,6 +1,5 @@
 import datetime
 import sys
-import psycopg2
 from Api_connect import Ysell_regu
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, insert, select, exists, inspect
@@ -11,9 +10,11 @@ import sqlalchemy
 import numpy as np
 
 # создаем сессию
+with open('database.txt', 'r') as file:
+    conn_string = file.readline().strip()
 
 
-engine = create_engine('postgresql://data_user:12345678@localhost:5432/Aprobation')
+engine = create_engine(conn_string)
 Session = sessionmaker(bind=engine)
 metadata = MetaData()
 
@@ -127,8 +128,33 @@ def update_products(table_name='products',token='token.txt',link='https://1359.e
             session.merge(products)
     session.commit()
     session.close()
+    print('Ready!')
     print('\n')
 
+def update_companies(table_name='products',token='token.txt',link='https://1359.eu11.ysell.pro/api/v1/'):
+    data = Ysell_regu(url=link,token=token).company_req()
+    companies = create_table(table_name, data)
+    Base = sqlalchemy.orm.declarative_base()
+
+    class Companies(Base):
+        __tablename__ = table_name
+        __table__ = companies
+
+    session = Session()
+
+    with engine.connect() as connection:
+        # Загрузить данные из датафрейма в список словарей
+        data['id'] = data.index
+        data1 = data.to_dict('records')
+
+        # Обновить или добавить записи в таблицу
+        for row in data1:
+            companies = Companies(**row)
+            session.merge(companies)
+    session.commit()
+    session.close()
+    print('Ready!')
+    print('\n')
 
 # update_products()
 

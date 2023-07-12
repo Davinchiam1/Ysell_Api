@@ -45,6 +45,10 @@ class App(tk.Frame):
         self.products = tk.Button(self, text="Load products", command=self.load_products)
         self.products.grid(row=3, column=2,sticky=tk.N)
 
+        self.comp_button = tk.Button(self, text="Load companies", command=self.load_companies)
+        self.comp_button.grid(row=3, column=3, sticky=tk.N)
+
+
     def update_orders_thread(self):
         threading.Thread(target=self.update_orders).start()
 
@@ -62,6 +66,7 @@ class App(tk.Frame):
                 self.token_name = 'token.txt'
                 self.orders_name = 'orders'
                 self.prod_table = 'products'
+                self.companies = 'companies'
                 self.token_label["text"] = f"Token: {token}"
         elif self.combobox.get() == self.options[1]:
             with open('token2.txt', "r", encoding='utf8') as f:
@@ -69,6 +74,7 @@ class App(tk.Frame):
                 self.token_name = 'token2.txt'
                 self.orders_name = 'orders_v2'
                 self.prod_table = 'products_v2'
+                self.companies = 'companies_v2'
                 self.token_label["text"] = f"Token: {token}"
     def read_token(self):
         if self.combobox.get() == self.options[0]:
@@ -77,6 +83,7 @@ class App(tk.Frame):
                 self.token_name = 'token.txt'
                 self.orders_name = 'orders'
                 self.prod_table = 'products'
+                self.companies = 'companies'
                 return token
         elif self.combobox.get() == self.options[1]:
             with open('token2.txt', "r", encoding='utf8') as f:
@@ -84,6 +91,7 @@ class App(tk.Frame):
                 self.token_name = 'token.txt'
                 self.orders_name = 'orders_v2'
                 self.prod_table = 'products_v2'
+                self.companies = 'companies_v2'
                 return token
 
     def update_orders(self):
@@ -96,7 +104,11 @@ class App(tk.Frame):
                           link='https://' + self.combobox.get() + '.ysell.pro/api/v1/', token=self.token_name)
 
     def load_products(self):
-        dbc.update_products(table_name=self.orders_name,link='https://' + self.combobox.get() + '.ysell.pro/api/v1/', token=self.token_name)
+        dbc.update_products(table_name=self.prod_table,link='https://' + self.combobox.get() + '.ysell.pro/api/v1/', token=self.token_name)
+
+    def load_companies(self):
+        dbc.update_companies(table_name=self.companies, link='https://' + self.combobox.get() + '.ysell.pro/api/v1/',
+                            token=self.token_name)
 
 root = tk.Tk()
 root.title("Database update App")

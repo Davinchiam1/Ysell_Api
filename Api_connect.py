@@ -65,6 +65,21 @@ class Ysell_regu:
         temp_frame.set_index('id', inplace=True)
         return temp_frame
 
+    def company_by_page(self, page=1):
+        self.temp_frame = pd.DataFrame()
+        pages = '?page=' + str(page)
+        url = self.url + 'company' + pages + '&per-page=50'
+        response = requests.get(url=url, headers=self.headers)
+        print(response.status_code)
+        json_data = response.json()
+        df = pd.json_normalize(json_data)
+        self.pages = response.headers.get('X-Pagination-Page-Count')
+
+        # применение функции к датафрейму
+        temp_frame = df
+        temp_frame.set_index('id', inplace=True)
+        return temp_frame
+
     def orders_req(self, start=1, end=10):
         final_frame = pd.DataFrame()
         error_pages = []  # Список для хранения страниц с ошибками
@@ -98,11 +113,21 @@ class Ysell_regu:
 
         return final_frame
 
-    def product_req(self, load_all=True, start=1, end=3):
+    def product_req(self, load_all=True, start=1, end=5):
         final_frame = pd.DataFrame()
         page = start
         while page <= end:
             final_frame = pd.concat([final_frame, self.products_by_page(page=page)])
+            if load_all and page == start:
+                end = int(self.pages)
+            page += 1
+        return final_frame
+
+    def company_req(self, load_all=True, start=1, end=3):
+        final_frame = pd.DataFrame()
+        page = start
+        while page <= end:
+            final_frame = pd.concat([final_frame, self.company_by_page(page=page)])
             if load_all and page == start:
                 end = int(self.pages)
             page += 1
@@ -136,11 +161,11 @@ class Keepa_req:
         json_data = response.json()['categories']
         df = pd.DataFrame.from_dict(json_data, orient='index')
         if filepath is not None:
-            df.to_excel(filepath+'\\category_req.xlsx')
+            df.to_excel(filepath + '\\category_req.xlsx')
         else:
             df.to_excel('category_req.xlsx')
 
-    def category_search(self, search="",filepath=None):
+    def category_search(self, search="", filepath=None):
         url = f"{self.url}search?key={self.access_key}&domain={1}&type=category&term={search}"
         response = requests.get(url)
         json_data = response.json()['categories']
@@ -150,7 +175,7 @@ class Keepa_req:
         else:
             df.to_excel('category_req.xlsx')
 
-    def product_req(self, asin,filepath=None):
+    def product_req(self, asin, filepath=None):
         if type(asin) is list:
             asin = ','.join(asin)
         data = {
@@ -167,7 +192,7 @@ class Keepa_req:
         else:
             df.to_excel('product_req.xlsx')
 
-    def product_search(self, search={},filepath=None):
+    def product_search(self, search={}, filepath=None):
         encoded_data = urlencode(search)
         url = f"{self.url}search?key={self.access_key}&domain={1}&type=product&term={search}&stats=180"
         response = requests.get(url)
@@ -189,7 +214,7 @@ class Keepa_req:
         else:
             df.to_excel('product_finder.xlsx')
 
-    def bsr_req(self, category: int = 0, range: int = 30,filepath=None):
+    def bsr_req(self, category: int = 0, range: int = 30, filepath=None):
         url = f"{self.url}bestsellers?key={self.access_key}&domain={1}&category={category}&range={range}"
         response = requests.get(url)
         json_data = response.json()['categories']
